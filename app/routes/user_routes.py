@@ -61,7 +61,7 @@ def get_one_user(user_id):
     if not user:
         abort(make_response({"error": "User not found"}, 404))
 
-    response = {"useer": user.to_dict()}
+    response = {"user": user.to_dict()}
     return response, 200
 
 @bp.put("")
