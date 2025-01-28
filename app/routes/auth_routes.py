@@ -3,9 +3,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from ..models.user import User
 from ..db import db
 
-auth_bp = Blueprint("auth_bp", __name__, url_prefix="/auth")
+bp = Blueprint("auth_bp", __name__, url_prefix="/auth")
 
-@auth_bp.post("/signup")
+@bp.post("/signup")
 def signup_user():
     data = request.get_json()
 
@@ -30,7 +30,7 @@ def signup_user():
 
     return {"message": "User created successfully", "user": new_user.to_dict()}, 201
 
-@auth_bp.post("/login")
+@bp.post("/login")
 def login_user():
     data = request.get_json()
 

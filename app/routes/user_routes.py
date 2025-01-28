@@ -3,15 +3,15 @@ from ..models.user import User
 from ..db import db
 from datetime import datetime
 
-user_bp = Blueprint("user_bp", __name__, url_prefix="/users")
+bp = Blueprint("user_bp", __name__, url_prefix="/users")
 
-@user_bp.get("")
+@bp.get("")
 def get_users():
     users = User.query.all()
     users_list = [user.to_dict() for user in users]
     return users_list, 200
 
-@user_bp.get("/<user_id>")
+@bp.get("/<user_id>")
 def get_one_user(user_id):
     user = User.query.get(user_id)
     if not user:
@@ -19,7 +19,7 @@ def get_one_user(user_id):
 
     return {"user": user.to_dict()}, 200
 
-@user_bp.put("/<user_id>")
+@bp.put("/<user_id>")
 def update_user(user_id):
     user = User.query.get(user_id)
     if not user:
@@ -34,7 +34,7 @@ def update_user(user_id):
     db.session.commit()
     return {"message": "User updated successfully", "user": user.to_dict()}, 200
 
-@user_bp.delete("/<user_id>")
+@bp.delete("/<user_id>")
 def delete_user(user_id):
     user = User.query.get(user_id)
     if not user:
