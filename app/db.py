@@ -6,5 +6,5 @@ from flask_cors import CORS
 
 db = SQLAlchemy(model_class=Base)
 migrate = Migrate()
-socketio = SocketIO()
 cors = CORS()
+socketio = SocketIO(cors_allowed_origins="*")

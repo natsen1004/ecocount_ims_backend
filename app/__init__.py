@@ -1,5 +1,5 @@
 from flask import Flask
-from .db import db, migrate, socketio, cors
+from .db import db, migrate, cors, socketio
 import os
 from .routes.products_routes import bp as products_bp
 from .routes.user_routes import bp as user_bp
@@ -18,8 +18,22 @@ def create_app(config=None):
 
     db.init_app(app)
     migrate.init_app(app, db)
-    socketio.init_app(app)
-    cors.init_app(app)
+
+    cors.init_app(
+        app,
+        resources={
+            r"/*": {
+                "origins": "*",  
+                "supports_credentials": True,
+            }
+        },
+    )
+
+    socketio.init_app(
+        app,
+        cors_allowed_origins="*",  
+        transports=["websocket", "polling"],  
+    )
 
     app.register_blueprint(products_bp)
     app.register_blueprint(user_bp)
