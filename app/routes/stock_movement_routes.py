@@ -4,6 +4,7 @@ from ..models.products import Products
 from ..db import db
 from datetime import datetime
 from app.routes.route_utilities import validate_model
+from app.services.notification_service import check_and_create_stock_alert
 
 bp = Blueprint("stock_movement_bp", __name__, url_prefix="/stock_movement")
 
@@ -11,20 +12,12 @@ bp = Blueprint("stock_movement_bp", __name__, url_prefix="/stock_movement")
 def create_stock_movement():
   request_body = request.get_json()
 
-  try:
-    product = Products.query.get_or_404(request_body.get("product_id"))
-    request_body["sku"] = product.sku
-
-    new_stock_movement = StockMovement.from_dict(request_body)
-  except KeyError as e:
-    missing_key = e.args[0]
-    response = {"details": f"Invalid request body: Missing key '{missing_key}'"}
-    abort(make_response(response, 400))
-
-  db.session.add(new_stock_movement)
+  stock_movement = StockMovement.from_dict(request_body)
+  db.session.add(stock_movement)
   db.session.commit()
+  check_and_create_stock_alert(stock_movement, db.session)
 
-  response = {"stock_movement": new_stock_movement.to_dict()}
+  response = {"stock_movement": stock_movement.to_dict()}
   return response, 201
 
 @bp.get("")

@@ -10,19 +10,23 @@ class Notification(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     type: Mapped[str]
     sent_at: Mapped[Optional[datetime]] = mapped_column(default=datetime.utcnow)
+    read: Mapped[bool] = mapped_column(default=False)
 
     product_id: Mapped[Optional[int]] = mapped_column(ForeignKey("products.id"))
     product = relationship("Products", back_populates="notifications")
 
-    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
-    user: Mapped[Optional["User"]] = relationship("User", back_populates="notifications")
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user: Mapped["User"] = relationship("User", back_populates="notifications")
 
     def to_dict(self):
-        return {
-            "id": self.id,
-            "type": self.type,
-            "sent_at": self.sent_at,
-        }
+        return dict(
+            id=self.id,
+            type=self.type,
+            sent_at=self.sent_at,
+            read=self.read,
+            product_id=self.product_id,
+            user_id=self.user_id
+        )
 
     @classmethod
     def from_dict(cls, notification_data):

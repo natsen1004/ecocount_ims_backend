@@ -31,8 +31,8 @@ def create_notification():
     db.session.add(notification)
     db.session.commit()
     
-    from app.sockets import emit_notification
-    emit_notification(user_id, product.name, notification.type)
+    # from app.sockets import emit_notification
+    # emit_notification(user_id, product.name, notification.type)
 
     response = {"notification": notification.to_dict()}
     return response, 201
