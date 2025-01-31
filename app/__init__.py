@@ -6,6 +6,7 @@ from .routes.user_routes import bp as user_bp
 from .routes.reports_routes import bp as report_bp
 from .routes.notification_routes import bp as notification_bp
 from .routes.auth_routes import bp as auth_bp
+from .routes.stock_movement_routes import bp as stock_movement_bp
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -40,5 +41,6 @@ def create_app(config=None):
     app.register_blueprint(report_bp)
     app.register_blueprint(notification_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(stock_movement_bp)
 
     return app
