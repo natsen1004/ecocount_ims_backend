@@ -1,13 +1,13 @@
 from flask import Blueprint, request, abort, make_response, Response
-from ..db import db, socketio
+from ..db import db
 from app.models.products import Products
 from .route_utilities import validate_model
-from flask_socketio import emit
 
 bp = Blueprint("products_bp", __name__, url_prefix="/products")
 
 @bp.post("")
 def create_products():
+    from .. import socketio
     request_body = request.get_json()
 
     try:

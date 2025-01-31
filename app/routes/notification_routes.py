@@ -4,7 +4,6 @@ from ..models.products import Products
 from ..models.user import User
 from ..db import db
 from datetime import datetime
-from app.sockets import emit_notification
 
 bp = Blueprint("notification_bp", __name__, url_prefix="/notifications")
 
@@ -31,6 +30,8 @@ def create_notification():
 
     db.session.add(notification)
     db.session.commit()
+    
+    from app.sockets import emit_notification
     emit_notification(user_id, product.name, notification.type)
 
     response = {"notification": notification.to_dict()}

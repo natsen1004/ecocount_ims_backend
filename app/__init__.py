@@ -1,12 +1,17 @@
 from flask import Flask
-from .db import db, migrate, cors, socketio
+from .db import db, migrate
 import os
+from flask_socketio import SocketIO
+from flask_cors import CORS
 from .routes.products_routes import bp as products_bp
 from .routes.user_routes import bp as user_bp
 from .routes.reports_routes import bp as report_bp
 from .routes.notification_routes import bp as notification_bp
 from .routes.auth_routes import bp as auth_bp
 from .routes.stock_movement_routes import bp as stock_movement_bp
+from app.sockets import register_socketio_events
+
+socketio = SocketIO()
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -20,21 +25,8 @@ def create_app(config=None):
     db.init_app(app)
     migrate.init_app(app, db)
 
-    cors.init_app(
-        app,
-        resources={
-            r"/*": {
-                "origins": "*",  
-                "supports_credentials": True,
-            }
-        },
-    )
-
-    socketio.init_app(
-        app,
-        cors_allowed_origins="*",  
-        transports=["websocket", "polling"],  
-    )
+    cors = CORS(app, resources={r"/*": {"origins": "http://localhost:5173", "supports_credentials": True}})
+    socketio.init_app(app)
 
     app.register_blueprint(products_bp)
     app.register_blueprint(user_bp)
@@ -42,5 +34,7 @@ def create_app(config=None):
     app.register_blueprint(notification_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(stock_movement_bp)
+
+    register_socketio_events(socketio)
 
     return app
