@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
-from app.models.products import Products
 from app.models.notification import Notification
+from app.services.email_services import send_email_notification
 
 def check_and_create_stock_alert(stock_movement, db_session: Session):
   product = stock_movement.product 
@@ -20,4 +20,5 @@ def check_and_create_stock_alert(stock_movement, db_session: Session):
     db_session.add(notification)
     db_session.commit()
 
-    
+    user_email = product.user.email
+    send_email_notification(user_email, message)
