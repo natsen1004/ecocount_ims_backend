@@ -33,15 +33,20 @@ def signup_user():
 @bp.post("/login")
 def login_user():
     data = request.get_json()
-
     email = data.get("email")
     password = data.get("password")
 
     if not email or not password:
-        abort(make_response({"error": "Email and password are required"}, 400))
+        return {"error": "Email and password are required"}, 400
 
     user = User.query.filter_by(email=email).first()
-    if not user or not user.check_password(password):  
-        abort(make_response({"error": "Invalid email or password"}, 401))
+    if not user:
+        return {"error": "User not found"}, 404  
+
+    if not hasattr(user, "password_hash"):
+        return {"error": "User password not set properly"}, 500  
+
+    if not user.check_password(password):
+        return {"error": "Invalid email or password"}, 401  
 
     return {"message": "Login successful", "user": user.to_dict()}, 200
