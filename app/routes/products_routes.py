@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, make_response, Response
+from flask import Blueprint, request, abort, make_response
 from ..db import db
 from app.models.products import Products
 from .route_utilities import validate_model
@@ -7,7 +7,6 @@ bp = Blueprint("products_bp", __name__, url_prefix="/products")
 
 @bp.post("")
 def create_products():
-    from .. import socketio
     request_body = request.get_json()
 
     try:
@@ -19,11 +18,6 @@ def create_products():
 
     db.session.add(new_product)
     db.session.commit()
-
-    socketio.emit('new-product', {
-        'name': new_product.name,
-        'sku': new_product.sku
-    })
 
     response = {"product": new_product.to_dict()}
     return response, 201
@@ -62,21 +56,10 @@ def update_product(product_id):
 
     db.session.commit()
 
-    if product.quantity <= product.reorder_level:
-        socketio.emit(
-            "low_stock_alert",
-            {
-                "product_id": product_id,
-                "product_name": product.name,
-                "quantity": product.quantity,
-                "reorder_level": product.reorder_level,
-            },
-            broadcast=True
-        )
-
-    return {"message": f"Product {product_id} successfully updated",
-            "product": product.to_dict(),
-            }, 200
+    return {
+        "message": f"Product {product_id} successfully updated",
+        "product": product.to_dict(),
+    }, 200
 
 @bp.delete("/<product_id>")
 def delete_product(product_id):
@@ -85,10 +68,6 @@ def delete_product(product_id):
     db.session.delete(product)
     db.session.commit()
 
-    socketio.emit('delete-product', {
-        'name': product.name,
-        'sku': product.sku
-    })
-
     return {"message": f"Product {product_id} successfully deleted"}, 200
+
 
