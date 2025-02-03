@@ -3,13 +3,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from ..db import db
 from typing import List
 
-
 class User(db.Model):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(nullable=False)
+    password_hash: Mapped[str] = mapped_column(nullable=False)  
     role: Mapped[str] = mapped_column(nullable=False)
 
     products: Mapped[List["Products"]] = relationship("Products", back_populates="user")  
@@ -22,12 +21,11 @@ class User(db.Model):
     
     @password.setter
     def password(self, plain_text_password):
-        self.password_hash = generate_password_hash(plain_text_password)
+        self.password_hash = generate_password_hash(plain_text_password) 
     
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash(self.password_hash, password) 
     
-
     def to_dict(self):
         return dict(
             id=self.id,
@@ -41,6 +39,6 @@ class User(db.Model):
             email=user_data["email"],
             role=user_data["role"],
         )
-        user.password = user_data["password"]
+        user.password = user_data["password"]  
 
         return user
