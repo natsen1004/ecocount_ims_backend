@@ -33,7 +33,7 @@ def create_app(config=None):
         "https://your-frontend-app.onrender.com"  
     ]
 
-    CORS(app, resources={r"/*": {"origins": allowed_origins, "supports_credentials": True}})
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://your-frontend.onrender.com"], "supports_credentials": True}})
 
     app.register_blueprint(products_bp)
     app.register_blueprint(user_bp)
