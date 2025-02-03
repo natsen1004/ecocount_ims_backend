@@ -28,7 +28,12 @@ def create_app(config=None):
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
-    cors = CORS(app, resources={r"/*": {"origins": "http://localhost:5173", "supports_credentials": True}})
+    allowed_origins = [
+        "http://localhost:5173",  
+        "https://your-frontend-app.onrender.com"  
+    ]
+
+    CORS(app, resources={r"/*": {"origins": allowed_origins, "supports_credentials": True}})
 
     app.register_blueprint(products_bp)
     app.register_blueprint(user_bp)
