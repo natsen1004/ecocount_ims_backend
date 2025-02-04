@@ -37,11 +37,15 @@ def login_user():
     password = data.get("password")
 
     if not email or not password:
+        print("Missing email or password")
         return {"error": "Email and password are required"}, 400
 
     user = User.query.filter_by(email=email).first()
+
     if not user:
-        return {"error": "User not found"}, 404  
+        print(f"User with email {email} not found in DB")
+        return {"error": "User not found"}, 404 
+    print(f"Hashed Password in db: {user.password_hash}")
 
     if not hasattr(user, "password_hash"):
         return {"error": "User password not set properly"}, 500  
