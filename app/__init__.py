@@ -1,5 +1,6 @@
 from flask import Flask
 from .db import db, migrate, mail
+from dotenv import load_dotenv
 import os
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -10,6 +11,7 @@ from .routes.notification_routes import bp as notification_bp
 from .routes.auth_routes import bp as auth_bp
 from .routes.stock_movement_routes import bp as stock_movement_bp
 
+load_dotenv() 
 
 def create_app(config=None):
     app = Flask(__name__)
@@ -24,10 +26,16 @@ def create_app(config=None):
     app.config['MAIL_PASSWORD'] = 'your-email-password'
     app.config['MAIL_DEFAULT_SENDER'] = 'your-email@example.com'
 
-    app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "your_secret_key")  
+    app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "fallback_secret_key")
     app.config["JWT_TOKEN_LOCATION"] = ["headers"]  
     app.config["JWT_HEADER_NAME"] = "Authorization" 
     app.config["JWT_HEADER_TYPE"] = "Bearer"
+    print("🔹 Loading JWT Configuration...")
+    print(f"Render Environment - JWT_SECRET_KEY: {os.environ.get('JWT_SECRET_KEY')}")
+    print(f"JWT_SECRET_KEY: {app.config['JWT_SECRET_KEY']}")
+    print(f"JWT_TOKEN_LOCATION: {app.config['JWT_TOKEN_LOCATION']}")
+    print(f"JWT_HEADER_NAME: {app.config['JWT_HEADER_NAME']}")
+    print(f"JWT_HEADER_TYPE: {app.config['JWT_HEADER_TYPE']}")
 
     if config:
         app.config.update(config)
@@ -39,6 +47,7 @@ def create_app(config=None):
         "http://localhost:5173",  
         "https://your-frontend-app.onrender.com"  
     ]
+    print(f"🔹 CORS allowed origins: {allowed_origins}")
     CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://your-frontend.onrender.com"], "supports_credentials": True}})
     jwt = JWTManager(app) 
 
