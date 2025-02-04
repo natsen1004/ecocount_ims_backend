@@ -28,16 +28,18 @@ class Products(db.Model):
             sku=self.sku,
             quantity=self.quantity,
             reorder_level=self.reorder_level,
-            price=self.price,
+            price=float(self.price),
+            user_id=self.user_id
         )
 
     @classmethod
-    def from_dict(cls, products_data):
+    def from_dict(cls, products_data, user_id):
         return cls(
             name=products_data["name"],
             sku=products_data.get("sku", ""),
             quantity=products_data.get("quantity", 0),
             reorder_level=products_data.get("reorder_level", 0),
             price=products_data.get("price", 0.0),
+            user_id=user_id 
         )
 
