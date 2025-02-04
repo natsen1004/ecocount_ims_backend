@@ -33,12 +33,12 @@ class User(db.Model):
             role=self.role,
         )
 
-    @classmethod
-    def from_dict(cls, user_data):
-        user = cls(
-            email=user_data["email"],
-            role=user_data["role"],
-        )
-        user.password = user_data["password"]  
+@classmethod
+def from_dict(cls, user_data):
+    user = cls(
+        email=user_data["email"],
+        role=user_data["role"],
+    )
+    user.password = user_data["password"]  
 
-        return user
+    return user
