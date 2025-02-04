@@ -31,6 +31,7 @@ class User(db.Model):
             id=self.id,
             email=self.email,
             role=self.role,
+            password_hash=self.password_hash
         )
 
     @classmethod
