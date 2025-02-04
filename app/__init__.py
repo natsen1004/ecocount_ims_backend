@@ -16,13 +16,15 @@ def create_app(config=None):
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+
     app.config['MAIL_SERVER'] = 'smtp.example.com'
     app.config['MAIL_PORT'] = 587
     app.config['MAIL_USE_TLS'] = True
     app.config['MAIL_USERNAME'] = 'your-email@example.com'
     app.config['MAIL_PASSWORD'] = 'your-email-password'
     app.config['MAIL_DEFAULT_SENDER'] = 'your-email@example.com'
-    app.config["JWT_SECRET_KEY"] = "your_secret_key"  
+
+    app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "your_secret_key")  
     app.config["JWT_TOKEN_LOCATION"] = ["headers"]  
     app.config["JWT_HEADER_NAME"] = "Authorization" 
     app.config["JWT_HEADER_TYPE"] = "Bearer"
@@ -37,7 +39,6 @@ def create_app(config=None):
         "http://localhost:5173",  
         "https://your-frontend-app.onrender.com"  
     ]
-
     CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://your-frontend.onrender.com"], "supports_credentials": True}})
     jwt = JWTManager(app) 
 
