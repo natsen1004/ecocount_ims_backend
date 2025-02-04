@@ -1,5 +1,4 @@
 from flask import Blueprint, request, abort, make_response
-from werkzeug.security import generate_password_hash, check_password_hash
 from ..models.user import User
 from ..db import db
 
@@ -23,7 +22,8 @@ def signup_user():
         email=email,
         role=role,
     )
-    new_user.password = password  
+    from werkzeug.security import generate_password_hash 
+    new_user.password_hash = generate_password_hash(password)  
 
     print(f"Stored Hashed Password: {new_user.password_hash}") 
 
@@ -60,7 +60,7 @@ def login_user():
     from werkzeug.security import check_password_hash
     is_match = check_password_hash(user.password_hash, password)
 
-    print(f"🔍 Manual Password Check: {is_match}")  
+    print(f"Manual Password Check: {is_match}")  
     if not is_match:
         print("Password check failed! Incorrect password entered.")
         return {"error": "Invalid email or password"}, 401  

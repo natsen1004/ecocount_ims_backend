@@ -14,9 +14,10 @@ class Products(db.Model):
     quantity: Mapped[int] = mapped_column(nullable=False, default=0)
     reorder_level: Mapped[int] = mapped_column(nullable=False, default=0)
     price: Mapped[Numeric] = mapped_column(Numeric(precision=10, scale=2), nullable=False, default=0.0)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
 
     notifications: Mapped[List["Notification"]] = relationship("Notification", back_populates="product", cascade="all, delete-orphan")
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
+
     user: Mapped["User"] = relationship("User", back_populates="products")
     reports: Mapped[List["Reports"]] = relationship("Reports", back_populates="product", cascade="all, delete-orphan")
     stock_movements: Mapped[List["StockMovement"]] = relationship("StockMovement", back_populates="product", cascade="all, delete-orphan")  

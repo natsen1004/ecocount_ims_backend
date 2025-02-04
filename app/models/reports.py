@@ -13,11 +13,11 @@ class Reports(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     quantity_sold: Mapped[int] = mapped_column(nullable=False, default=0)
     created_on: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
 
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
     product: Mapped[Optional["Products"]] = relationship("Products", back_populates="reports")
 
-    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
     user: Mapped[Optional["User"]] = relationship("User", back_populates="reports")
 
     stock_movements: Mapped[List["StockMovement"]] = relationship("StockMovement", back_populates="report", cascade="all, delete-orphan")  
