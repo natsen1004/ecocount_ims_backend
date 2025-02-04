@@ -26,12 +26,12 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password) 
     
-    def to_dict(self):
-        return dict(
-            id=self.id,
-            email=self.email,
-            role=self.role,
-        )
+def to_dict(self):
+    return dict(
+        id=self.id,
+        email=self.email,
+        role=self.role,
+    )
 
 @classmethod
 def from_dict(cls, user_data):
