@@ -25,10 +25,13 @@ def signup_user():
     )
     new_user.password = password  
 
+    print(f"Stored Hashed Password: {new_user.password_hash}") 
+
     db.session.add(new_user)
     db.session.commit()
 
     return {"message": "User created successfully", "user": new_user.to_dict()}, 201
+
 
 @bp.post("/login")
 def login_user():
@@ -48,14 +51,22 @@ def login_user():
 
     print(f"Checking login for: {email}")
     print(f"Hashed Password in DB: {user.password_hash}")
+    print(f"Attempting to check password: {password}")
 
     if not hasattr(user, "password_hash"):
+        print("User has no password hash stored!")
         return {"error": "User password not set properly"}, 500  
 
-    if not user.check_password(password):
-        print("Password check failed")
+    from werkzeug.security import check_password_hash
+    is_match = check_password_hash(user.password_hash, password)
+
+    print(f"🔍 Manual Password Check: {is_match}")  
+    if not is_match:
+        print("Password check failed! Incorrect password entered.")
         return {"error": "Invalid email or password"}, 401  
 
-    print("Login successful!")
+    print(f"Password match! Logging in {email}")
+
     return {"message": "Login successful", "user": user.to_dict()}, 200
+
 
