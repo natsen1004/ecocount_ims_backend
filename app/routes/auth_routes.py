@@ -9,7 +9,7 @@ bp = Blueprint("auth_bp", __name__, url_prefix="/auth")
 def signup_user():
     data = request.get_json()
 
-    email = data.get("email")
+    email = data.get("email", "").strip().lower()  
     password = data.get("password")
     role = data.get("role", "user")  
 
@@ -33,8 +33,8 @@ def signup_user():
 @bp.post("/login")
 def login_user():
     data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+    email = data.get("email", "").strip().lower()  
+    password = data.get("password", "")
 
     if not email or not password:
         print("Missing email or password")
@@ -44,13 +44,18 @@ def login_user():
 
     if not user:
         print(f"User with email {email} not found in DB")
-        return {"error": "User not found"}, 404 
-    print(f"Hashed Password in db: {user.password_hash}")
+        return {"error": "Invalid email or password"}, 401  
+
+    print(f"Checking login for: {email}")
+    print(f"Hashed Password in DB: {user.password_hash}")
 
     if not hasattr(user, "password_hash"):
         return {"error": "User password not set properly"}, 500  
 
     if not user.check_password(password):
+        print("Password check failed")
         return {"error": "Invalid email or password"}, 401  
 
+    print("Login successful!")
     return {"message": "Login successful", "user": user.to_dict()}, 200
+
