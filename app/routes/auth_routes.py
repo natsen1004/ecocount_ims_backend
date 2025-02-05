@@ -38,9 +38,9 @@ def login():
     if not user or not user.check_password(password):
         return {"error": "Invalid email or password"}, 401  
 
-    login_user(user)  
-    session["user_id"] = user.id  
+    login_user(user) 
     return {"message": "Login successful", "user": user.to_dict()}, 200
+
 
 @bp.post("/logout")
 @login_required

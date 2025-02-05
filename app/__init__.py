@@ -36,21 +36,23 @@ def create_app(config=None):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     mail.init_app(app)
+
     allowed_origins = [
         "http://localhost:5173",  
         "https://ecocount-ims-backend.onrender.com"  
     ]
-    print(f"🔹 CORS allowed origins: {allowed_origins}")
-    CORS(app, resources={r"/*": {
-    "origins": allowed_origins,
-    "supports_credentials": True  
-    }})
+    CORS(app, supports_credentials=True, resources={r"/*": {"origins": allowed_origins}})
+
+
+    login_manager.init_app(app)
+    login_manager.login_view = "auth_bp.login"  
+    login_manager.login_message = "Please log in to access this page."
 
     @login_manager.user_loader
     def load_user(user_id):
+        print(f"🔹 Loading user from session: {user_id}") 
         return User.query.get(int(user_id))
 
-    login_manager.login_view = "bp.login_user" 
 
     app.register_blueprint(products_bp)
     app.register_blueprint(user_bp)

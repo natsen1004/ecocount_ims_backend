@@ -43,14 +43,25 @@ def require_api_key(f):
 @login_required
 def get_all_products():
     try:
-        query = db.select(Products).order_by(Products.id)
-        products = Products.query.filter_by(user_id=current_user.id).all()
+        if not current_user.is_authenticated:
+            print("User is not authenticated.")
+            return {"error": "User not authenticated"}, 401
 
+        print("Fetching products for user:", current_user.id)
+        
+        products = Products.query.filter_by(user_id=current_user.id).all()
+        
+        if not products:
+            print("No products found for this user.")
         products_response = [product.to_dict() for product in products]
+        
+        print("Products retrieved:", products_response)
         return products_response, 200
+
     except Exception as e:
         print(f"Error fetching products: {e}")  
-        return {"error": "An error occurred while fetching products."}, 500
+        return {"error": "An error occurred while fetching products.", "details": str(e)}, 500
+
     
 @bp.get("/<product_id>")
 def get_one_product(product_id):
