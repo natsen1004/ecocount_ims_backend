@@ -1,16 +1,20 @@
 from flask import Blueprint, request, abort, make_response
 from ..db import db
 from app.models.products import Products
+from app.models.user import User
 from .route_utilities import validate_model
+from flask_login import login_required, current_user
 
 bp = Blueprint("products_bp", __name__, url_prefix="/products")
 
 @bp.post("")
+@login_required
 def create_products():
     request_body = request.get_json()
 
     try:
         new_product = Products.from_dict(request_body)
+        new_product.user_id = current_user.id 
     except KeyError as e:
         missing_key = e.args[0]
         response = {"details": f"Invalid request body: Missing key '{missing_key}'"}
@@ -22,11 +26,25 @@ def create_products():
     response = {"product": new_product.to_dict()}
     return response, 201
 
+def require_api_key(f):
+    def wrapper(*args, **kwargs):
+        api_key = request.headers.get("X-API-KEY")
+        if not api_key:
+            return {"error": "Missing API key"}, 401
+
+        user = User.query.filter_by(api_key=api_key).first()
+        if not user:
+            return {"error": "Invalid API key"}, 401
+        
+        return f(user, *args, **kwargs)
+    return wrapper
+
 @bp.get("")
+@login_required
 def get_all_products():
     try:
         query = db.select(Products).order_by(Products.id)
-        products = db.session.scalars(query).all()
+        products = Products.query.filter_by(user_id=current_user.id).all()
 
         products_response = [product.to_dict() for product in products]
         return products_response, 200

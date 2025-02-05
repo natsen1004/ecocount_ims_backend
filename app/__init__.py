@@ -3,6 +3,7 @@ from .db import db, migrate, mail
 import os
 from flask_cors import CORS
 from flask_login import LoginManager
+from .models.user import User
 from .routes.products_routes import bp as products_bp
 from .routes.user_routes import bp as user_bp
 from .routes.reports_routes import bp as report_bp
@@ -17,8 +18,10 @@ def create_app(config=None):
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+
     app.config['SECRET_KEY'] = 'b7f8a9c6d3e1f2g4h5i6j7k8l9m0n1o2'
     app.config["SESSION_TYPE"] = "filesystem"
+
     app.config['MAIL_SERVER'] = 'smtp.example.com'
     app.config['MAIL_PORT'] = 587
     app.config['MAIL_USE_TLS'] = True
@@ -35,10 +38,19 @@ def create_app(config=None):
     mail.init_app(app)
     allowed_origins = [
         "http://localhost:5173",  
-        "https://your-frontend-app.onrender.com"  
+        "https://ecocount-ims-backend.onrender.com"  
     ]
     print(f"🔹 CORS allowed origins: {allowed_origins}")
-    CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://ecocount-ims-backend.onrender.com"], "supports_credentials": True}})
+    CORS(app, resources={r"/*": {
+    "origins": allowed_origins,
+    "supports_credentials": True  
+    }})
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    login_manager.login_view = "bp.login_user" 
 
     app.register_blueprint(products_bp)
     app.register_blueprint(user_bp)
