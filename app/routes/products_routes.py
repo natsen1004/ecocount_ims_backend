@@ -58,7 +58,7 @@ def get_one_product(product_id):
 
     response = {"product": product.to_dict()}
     return response, 200
-@bp.get("/<int:user_id>")
+@bp.get("/<user_id>")
 @login_required  
 def get_products_by_user_id(user_id):
     try:
