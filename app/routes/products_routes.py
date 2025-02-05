@@ -58,6 +58,23 @@ def get_one_product(product_id):
 
     response = {"product": product.to_dict()}
     return response, 200
+@bp.get("/<int:user_id>")
+@login_required  
+def get_products_by_user_id(user_id):
+    try:
+        if current_user.id != user_id:
+            return {"error": "Unauthorized"}, 403
+        
+        products = Products.query.filter_by(user_id=user_id).all()
+
+        if not products:
+            return {"error": "No products found for this user."}, 404
+
+        products_response = [product.to_dict() for product in products]
+        return products_response, 200
+    except Exception as e:
+        return {"error": f"An error occurred while fetching products: {str(e)}"}, 500
+
 
 @bp.put("/<product_id>")
 def update_product(product_id):
