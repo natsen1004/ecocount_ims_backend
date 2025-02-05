@@ -2,17 +2,15 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from ..db import db
 from typing import List
-from flask_login import UserMixin
 import secrets
 
-class User(db.Model, UserMixin):
+class User(db.Model):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(nullable=False)  
     role: Mapped[str] = mapped_column(nullable=False)
-    api_key: Mapped[str] = mapped_column(unique=True, nullable=False, default=lambda: secrets.token_hex(32))
 
     products: Mapped[List["Products"]] = relationship("Products", back_populates="user")  
     notifications: Mapped[List["Notification"]] = relationship("Notification", back_populates="user")  
@@ -34,7 +32,6 @@ class User(db.Model, UserMixin):
             id=self.id,
             email=self.email,
             role=self.role,
-            api_key=self.api_key
         )
 
     @classmethod

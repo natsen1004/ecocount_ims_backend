@@ -1,5 +1,4 @@
-from flask import Blueprint, request, abort, make_response, session, redirect, url_for
-from flask_login import login_user, logout_user, login_required, current_user
+from flask import Blueprint, request, abort, make_response
 from ..models.user import User
 from ..db import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -37,17 +36,8 @@ def login():
 
     if not user or not user.check_password(password):
         return {"error": "Invalid email or password"}, 401  
-
-    login_user(user) 
     return {"message": "Login successful", "user": user.to_dict()}, 200
 
-
-@bp.post("/logout")
-@login_required
-def logout():
-    logout_user() 
-    session.pop("user_id", None)
-    return {"message": "Logged out successfully"}, 200
 
 
 
