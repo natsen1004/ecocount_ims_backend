@@ -3,7 +3,6 @@ from .db import db, migrate, mail
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
 from .routes.products_routes import bp as products_bp
 from .routes.user_routes import bp as user_bp
 from .routes.reports_routes import bp as report_bp
@@ -26,17 +25,6 @@ def create_app(config=None):
     app.config['MAIL_PASSWORD'] = 'your-email-password'
     app.config['MAIL_DEFAULT_SENDER'] = 'your-email@example.com'
 
-    app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "fallback_secret_key")
-    app.config["JWT_TOKEN_LOCATION"] = ["headers"]  
-    app.config["JWT_HEADER_NAME"] = "Authorization" 
-    app.config["JWT_HEADER_TYPE"] = "Bearer"
-    print("🔹 Loading JWT Configuration...")
-    print(f"Render Environment - JWT_SECRET_KEY: {os.environ.get('JWT_SECRET_KEY')}")
-    print(f"JWT_SECRET_KEY: {app.config['JWT_SECRET_KEY']}")
-    print(f"JWT_TOKEN_LOCATION: {app.config['JWT_TOKEN_LOCATION']}")
-    print(f"JWT_HEADER_NAME: {app.config['JWT_HEADER_NAME']}")
-    print(f"JWT_HEADER_TYPE: {app.config['JWT_HEADER_TYPE']}")
-
     if config:
         app.config.update(config)
 
@@ -48,8 +36,7 @@ def create_app(config=None):
         "https://your-frontend-app.onrender.com"  
     ]
     print(f"🔹 CORS allowed origins: {allowed_origins}")
-    CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://your-frontend.onrender.com"], "supports_credentials": True}})
-    jwt = JWTManager(app) 
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://ecocount-ims-backend.onrender.com"], "supports_credentials": True}})
 
     app.register_blueprint(products_bp)
     app.register_blueprint(user_bp)

@@ -2,19 +2,15 @@ from flask import Blueprint, request, abort, make_response
 from ..db import db
 from app.models.products import Products
 from .route_utilities import validate_model
-from flask_jwt_extended import get_jwt_identity, jwt_required
 
 bp = Blueprint("products_bp", __name__, url_prefix="/products")
 
 @bp.post("")
-@jwt_required()
 def create_products():
-    user_id = get_jwt_identity()
     request_body = request.get_json()
 
     try:
         new_product = Products.from_dict(request_body)
-        new_product.user_id = user_id
     except KeyError as e:
         missing_key = e.args[0]
         response = {"details": f"Invalid request body: Missing key '{missing_key}'"}
@@ -27,12 +23,9 @@ def create_products():
     return response, 201
 
 @bp.get("")
-@jwt_required()
 def get_all_products():
-    user_id = get_jwt_identity()
-
     try:
-        query = db.select(Products).where(Products.user_id == user_id).order_by(Products.id)
+        query = db.select(Products).order_by(Products.id)
         products = db.session.scalars(query).all()
 
         products_response = [product.to_dict() for product in products]

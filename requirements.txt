@@ -9,7 +9,6 @@ eventlet==0.38.2
 exceptiongroup==1.2.2
 Flask==3.0.2
 Flask-Cors==5.0.0
-Flask-JWT-Extended==4.7.1
 Flask-Mail==0.10.0
 Flask-Migrate==4.0.5
 Flask-SQLAlchemy==3.1.1
@@ -37,6 +36,6 @@ SQLAlchemy==2.0.25
 tomli==2.2.1
 typing_extensions==4.9.0
 urllib3==2.2.3
-Werkzeug==3.0.1
+Werkzeug==2.3.8
 wsproto==1.2.0
 zipp==3.21.0

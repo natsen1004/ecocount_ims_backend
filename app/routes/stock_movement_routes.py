@@ -5,7 +5,6 @@ from ..db import db
 from datetime import datetime
 from app.routes.route_utilities import validate_model
 from app.services.notification_service import check_and_create_stock_alert
-from flask_jwt_extended import jwt_required, get_jwt_identity
 
 bp = Blueprint("stock_movement_bp", __name__, url_prefix="/stock_movement")
 
@@ -22,12 +21,9 @@ def create_stock_movement():
   return response, 201
 
 @bp.get("")
-@jwt_required()
 def get_stock_movements():
-  user_id = get_jwt_identity()
-
   try:
-    stock_movements = StockMovement.query.query.filter_by(user_id=user_id).all()
+    stock_movements = StockMovement.query.all()
     stock_movements_response = [sm.to_dict() for sm in stock_movements]
     return stock_movements_response, 200
   except Exception as e:
