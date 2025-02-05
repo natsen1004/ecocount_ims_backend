@@ -26,19 +26,6 @@ def create_products():
     response = {"product": new_product.to_dict()}
     return response, 201
 
-def require_api_key(f):
-    def wrapper(*args, **kwargs):
-        api_key = request.headers.get("X-API-KEY")
-        if not api_key:
-            return {"error": "Missing API key"}, 401
-
-        user = User.query.filter_by(api_key=api_key).first()
-        if not user:
-            return {"error": "Invalid API key"}, 401
-        
-        return f(user, *args, **kwargs)
-    return wrapper
-
 @bp.get("")
 @login_required
 def get_all_products():

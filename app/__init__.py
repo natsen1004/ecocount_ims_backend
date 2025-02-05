@@ -44,8 +44,7 @@ def create_app(config=None):
     mail.init_app(app)
 
     allowed_origins = [
-        "http://localhost:5173",  
-        "https://ecocount-ims-backend.onrender.com"  
+        "http://localhost:5173"
     ]
     CORS(app, resources={r"/*": {"origins": allowed_origins, "supports_credentials": True}})
 
