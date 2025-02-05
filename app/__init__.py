@@ -41,7 +41,7 @@ def create_app(config=None):
         "http://localhost:5173",  
         "https://ecocount-ims-backend.onrender.com"  
     ]
-    CORS(app, supports_credentials=True, resources={r"/*": {"origins": allowed_origins}})
+    CORS(app, resources={r"/*": {"origins": allowed_origins, "supports_credentials": True}})
 
 
     login_manager.init_app(app)
