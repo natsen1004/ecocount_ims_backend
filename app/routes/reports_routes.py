@@ -32,7 +32,12 @@ def create_reports():
 @bp.get("")
 def get_all_reports():
     try:
-        query = db.select(Reports).order_by(Reports.id)
+        user_id = request.args.get("user_id")
+
+        if not user_id:
+            return {"error": "User ID is required to fetch reports"}, 400
+
+        query = db.select(Reports).where(Reports.user_id == user_id).order_by(Reports.id)
         reports = db.session.scalars(query).all()
 
         reports_response = [report.to_dict() for report in reports]
