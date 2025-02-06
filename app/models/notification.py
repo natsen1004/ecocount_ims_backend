@@ -6,7 +6,6 @@ from datetime import datetime
 
 class Notification(db.Model):
     __tablename__ = "notifications"
-
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     type: Mapped[str]
     sent_at: Mapped[Optional[datetime]] = mapped_column(default=datetime.utcnow)

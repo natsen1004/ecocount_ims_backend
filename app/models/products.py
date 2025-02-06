@@ -6,22 +6,19 @@ from typing import List
 
 class Products(db.Model):
     __tablename__ = "products"
-    __table_args__ = {'extend_existing': True}
-
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(nullable=False)
-    sku: Mapped[str] = mapped_column(String, nullable=False)  
+    sku: Mapped[str] = mapped_column(String, nullable=False)
     quantity: Mapped[int] = mapped_column(nullable=False, default=0)
     reorder_level: Mapped[int] = mapped_column(nullable=False, default=0)
     price: Mapped[Numeric] = mapped_column(Numeric(precision=10, scale=2), nullable=False, default=0.0)
-
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
     notifications: Mapped[List["Notification"]] = relationship("Notification", back_populates="product", cascade="all, delete-orphan")
     user: Mapped["User"] = relationship("User", back_populates="products")
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-
     reports: Mapped[List["Reports"]] = relationship("Reports", back_populates="product", cascade="all, delete-orphan")
-    stock_movements: Mapped[List["StockMovement"]] = relationship("StockMovement", back_populates="product", cascade="all, delete-orphan")  
+    stock_movements: Mapped[List["StockMovement"]] = relationship("StockMovement", back_populates="product", cascade="all, delete-orphan")
+
     def to_dict(self):
         return dict(
             id=self.id,
@@ -30,17 +27,16 @@ class Products(db.Model):
             quantity=self.quantity,
             reorder_level=self.reorder_level,
             price=float(self.price),
-            user_id=self.user_id 
+            user_id=self.user_id
         )
 
     @classmethod
-    def from_dict(cls, products_data, user_id):
+    def from_dict(cls, product_data):
         return cls(
-            name=products_data["name"],
-            sku=products_data.get("sku", ""),
-            quantity=products_data.get("quantity", 0),
-            reorder_level=products_data.get("reorder_level", 0),
-            price=products_data.get("price", 0.0),
-            user_id=products_data.get("user_id", 1)
+            name=product_data["name"],
+            sku=product_data["sku"],
+            quantity=product_data.get("quantity", 0),
+            reorder_level=product_data.get("reorder_level", 0),
+            price=product_data.get("price", 0.0),
+            user_id=product_data["user_id"]
         )
-

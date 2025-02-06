@@ -7,65 +7,49 @@ from .route_utilities import validate_model
 bp = Blueprint("products_bp", __name__, url_prefix="/products")
 
 @bp.post("")
-def create_products():
-    request_body = request.get_json() or {}   
+def create_product():
+    request_body = request.get_json()
+    user_id = request_body.get("user_id")
 
-    new_product = Products.from_dict(request_body)  
+    if not user_id or not User.query.get(user_id):
+        abort(make_response({"error": "Valid user_id is required"}, 400))
+
+    new_product = Products.from_dict(request_body)
     db.session.add(new_product)
     db.session.commit()
-
     return {"product": new_product.to_dict()}, 201
-
 
 @bp.get("")
 def get_all_products():
-    try:
-        query = db.select(Products).order_by(Products.id)
-        products = db.session.scalars(query).all()
-        products_response = [product.to_dict() for product in products]
-        
-        print("Products retrieved:", products_response)
-        return products_response, 200
+    user_id = request.args.get("user_id")
+    if not user_id or not User.query.get(user_id):
+        abort(make_response({"error": "Valid user_id is required"}, 400))
 
-    except Exception as e:
-        print(f"Error fetching products: {e}")  
-        return {"error": "An error occurred while fetching products.", "details": str(e)}, 500
+    products = Products.query.filter_by(user_id=user_id).all()
+    return [product.to_dict() for product in products], 200
 
-    
 @bp.get("/<product_id>")
 def get_one_product(product_id):
-    product = validate_model(Products, product_id)
-    if not product:
-        abort(make_response({"message": f"product_id {product_id} not found"}, 404))
-
-    response = {"product": product.to_dict()}
-    return response, 200
+    product = Products.query.get_or_404(product_id)
+    return {"product": product.to_dict()}, 200
 
 @bp.put("/<product_id>")
 def update_product(product_id):
-    product = validate_model(Products, product_id)
+    product = Products.query.get_or_404(product_id)
     request_body = request.get_json()
 
-    product.name = request_body["name"]
-    product.sku = request_body["sku"]
-    product.quantity = request_body["quantity"]
-    product.reorder_level = request_body["reorder_level"]
-    product.price = request_body["price"]
+    for key, value in request_body.items():
+        if hasattr(product, key):
+            setattr(product, key, value)
 
     db.session.commit()
-
-    return {
-        "message": f"Product {product_id} successfully updated",
-        "product": product.to_dict(),
-    }, 200
+    return {"message": f"Product {product_id} updated", "product": product.to_dict()}, 200
 
 @bp.delete("/<product_id>")
 def delete_product(product_id):
-    product = validate_model(Products, product_id)
-
+    product = Products.query.get_or_404(product_id)
     db.session.delete(product)
     db.session.commit()
-
-    return {"message": f"Product {product_id} successfully deleted"}, 200
+    return {"message": f"Product {product_id} deleted"}, 200
 
 

@@ -24,7 +24,7 @@ def signup_user():
     db.session.add(new_user)
     db.session.commit()
 
-    return {"message": "User created successfully"}, 201
+    return {"message": "User created successfully", "user": new_user.to_dict()}, 201
 
 @bp.post("/login")
 def login():
@@ -35,8 +35,12 @@ def login():
     user = User.query.filter_by(email=email).first()
 
     if not user or not user.check_password(password):
-        return {"error": "Invalid email or password"}, 401  
-    return {"message": "Login successful", "user": user.to_dict()}, 200
+        abort(make_response({"error": "Invalid credentials"}, 401))  
+
+    return {
+        "message": "Login successful",
+        "user": user.to_dict(),
+    }, 200
 
 
 
