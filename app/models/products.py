@@ -18,7 +18,7 @@ class Products(db.Model):
 
     notifications: Mapped[List["Notification"]] = relationship("Notification", back_populates="product", cascade="all, delete-orphan")
     user: Mapped["User"] = relationship("User", back_populates="products")
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
     reports: Mapped[List["Reports"]] = relationship("Reports", back_populates="product", cascade="all, delete-orphan")
     stock_movements: Mapped[List["StockMovement"]] = relationship("StockMovement", back_populates="product", cascade="all, delete-orphan")  

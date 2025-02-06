@@ -7,23 +7,15 @@ from .route_utilities import validate_model
 bp = Blueprint("products_bp", __name__, url_prefix="/products")
 
 @bp.post("")
-
 def create_products():
-    request_body = request.get_json()
-    request_body.setdefault("user_id", 1)
+    request_body = request.get_json() or {}   
 
-    try:
-        new_product = Products.from_dict(request_body)
-    except KeyError as e:
-        missing_key = e.args[0]
-        response = {"details": f"Invalid request body: Missing key '{missing_key}'"}
-        abort(make_response(response, 400))
-
+    new_product = Products.from_dict(request_body)  
     db.session.add(new_product)
     db.session.commit()
 
-    response = {"product": new_product.to_dict()}
-    return response, 201
+    return {"product": new_product.to_dict()}, 201
+
 
 @bp.get("")
 def get_all_products():
