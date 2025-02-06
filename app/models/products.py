@@ -29,7 +29,6 @@ class Products(db.Model):
             quantity=self.quantity,
             reorder_level=self.reorder_level,
             price=float(self.price),
-            user_id=self.user_id
         )
 
     @classmethod
@@ -39,7 +38,6 @@ class Products(db.Model):
             sku=products_data.get("sku", ""),
             quantity=products_data.get("quantity", 0),
             reorder_level=products_data.get("reorder_level", 0),
-            price=products_data.get("price", 0.0),
-            user_id=user_id 
+            price=products_data.get("price", 0.0)
         )
 
