@@ -10,6 +10,7 @@ bp = Blueprint("products_bp", __name__, url_prefix="/products")
 
 def create_products():
     request_body = request.get_json()
+    request_body.setdefault("user_id", 1)
 
     try:
         new_product = Products.from_dict(request_body)

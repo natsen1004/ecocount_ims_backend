@@ -18,6 +18,8 @@ class Products(db.Model):
 
     notifications: Mapped[List["Notification"]] = relationship("Notification", back_populates="product", cascade="all, delete-orphan")
     user: Mapped["User"] = relationship("User", back_populates="products")
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
+
     reports: Mapped[List["Reports"]] = relationship("Reports", back_populates="product", cascade="all, delete-orphan")
     stock_movements: Mapped[List["StockMovement"]] = relationship("StockMovement", back_populates="product", cascade="all, delete-orphan")  
     def to_dict(self):
@@ -28,6 +30,7 @@ class Products(db.Model):
             quantity=self.quantity,
             reorder_level=self.reorder_level,
             price=float(self.price),
+            user_id=self.user_id 
         )
 
     @classmethod
@@ -37,6 +40,7 @@ class Products(db.Model):
             sku=products_data.get("sku", ""),
             quantity=products_data.get("quantity", 0),
             reorder_level=products_data.get("reorder_level", 0),
-            price=products_data.get("price", 0.0)
+            price=products_data.get("price", 0.0),
+            user_id=products_data.get("user_id", 1)
         )
 
