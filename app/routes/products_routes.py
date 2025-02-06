@@ -47,7 +47,14 @@ def update_product(product_id):
 
 @bp.delete("/<product_id>")
 def delete_product(product_id):
-    product = Products.query.get_or_404(product_id)
+    user_id = request.json.get('user_id')
+    if not user_id:
+        abort(make_response({"error": "user_id is required"}, 400))
+
+    product = Products.query.filter_by(id=product_id, user_id=user_id).first()
+    if not product:
+        abort(make_response({"error": "Product not found or unauthorized"}, 404))
+
     db.session.delete(product)
     db.session.commit()
     return {"message": f"Product {product_id} deleted"}, 200
