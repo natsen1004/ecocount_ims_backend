@@ -13,7 +13,8 @@ class User(db.Model):
     products: Mapped[List["Products"]] = relationship("Products", back_populates="user")
     notifications: Mapped[List["Notification"]] = relationship("Notification", back_populates="user")
     reports: Mapped[List["Reports"]] = relationship("Reports", back_populates="user")
-
+    stock_movements: Mapped[List["StockMovement"]] = relationship("StockMovement", back_populates="user")
+    
     @property
     def password(self):
         raise AttributeError("Password is not readable")
