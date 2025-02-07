@@ -28,6 +28,11 @@ def create_stock_movement():
     timestamp = data.get("timestamp")
     if not timestamp:
         timestamp = datetime.utcnow().isoformat()
+    
+    new_quantity = data.get("new_quantity")
+    product.quantity = new_quantity
+    db.session.commit()
+
 
     stock_movement = StockMovement(
         product_id=product.id,
@@ -35,7 +40,7 @@ def create_stock_movement():
         product_name=data.get("product_name"),
         sku=data["sku"],
         quantity_change=data["quantity_change"],
-        new_quantity=data["new_quantity"],
+        new_quantity=new_quantity,
         reason=data.get("reason")
     )
 
