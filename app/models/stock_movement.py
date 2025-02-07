@@ -29,7 +29,8 @@ class StockMovement(db.Model):
       quantity_change=self.quantity_change,
       new_quantity=self.new_quantity,
       timestamp=self.timestamp,
-      reason=self.reason
+      reason=self.reason,
+      report_id=self.report_id
     )
 
 
@@ -44,12 +45,13 @@ class StockMovement(db.Model):
     else:
       timestamp = datetime.utcnow()
 
-    stock_movement = cls (
+    return cls (
       product_id=stock_movement_data["product_id"],
       sku=stock_movement_data["sku"],
       quantity_change=stock_movement_data["quantity_change"],
       new_quantity=stock_movement_data["new_quantity"],
       timestamp=timestamp,
-      reason=stock_movement_data.get("reason")
+      reason=stock_movement_data.get("reason"),
+      report_id=stock_movement_data.get("report_id") 
     )  
   

@@ -37,11 +37,13 @@ def get_all_reports():
         if not user_id:
             return {"error": "User ID is required to fetch reports"}, 400
 
-        query = db.select(Reports).where(Reports.user_id == user_id).order_by(Reports.id)
-        reports = db.session.scalars(query).all()
+        reports = Reports.query.filter_by(user_id=user_id).all()
 
-        reports_response = [report.to_dict() for report in reports]
-        return reports_response, 200
+        if not reports:
+            return {"error": "No reports found for this user"}, 404
+
+        return [report.to_dict() for report in reports], 200
     except Exception as e:
         print(f"Error fetching reports: {e}")  
         return {"error": "An error occurred while fetching reports."}, 500
+
