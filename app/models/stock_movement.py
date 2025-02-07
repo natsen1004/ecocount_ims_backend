@@ -19,13 +19,17 @@ class StockMovement(db.Model):
   product: Mapped["Products"] = relationship("Products", back_populates="stock_movements") 
 
   report_id: Mapped[Optional[int]] = mapped_column(ForeignKey("reports.id"))
-  report: Mapped[Optional["Reports"]] = relationship("Reports", back_populates="stock_movements")  
+  report: Mapped[Optional["Reports"]] = relationship("Reports", back_populates="stock_movements") 
+
+  user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+  user: Mapped["User"] = relationship("User", back_populates="stock_movements") 
   
   def to_dict(self):
     return dict(
       id=self.id,
       sku=self.sku,
       product_id=self.product_id,
+      user_id=self.user_id,
       quantity_change=self.quantity_change,
       new_quantity=self.new_quantity,
       timestamp=self.timestamp,
@@ -47,6 +51,7 @@ class StockMovement(db.Model):
 
     return cls (
       product_id=stock_movement_data["product_id"],
+      user_id=stock_movement_data["user_id"],
       sku=stock_movement_data["sku"],
       quantity_change=stock_movement_data["quantity_change"],
       new_quantity=stock_movement_data["new_quantity"],
