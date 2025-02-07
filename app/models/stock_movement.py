@@ -13,7 +13,7 @@ class StockMovement(db.Model):
   sku: Mapped[str] = mapped_column(String, nullable=False) 
   quantity_change: Mapped[int] = mapped_column(nullable=False)
   new_quantity: Mapped[int] = mapped_column(nullable=False)
-  timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)  
+  timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow,nullable=False)  
   reason: Mapped[str] = mapped_column(String, nullable=True)  
 
   report_id: Mapped[Optional[int]] = mapped_column(ForeignKey("reports.id"))
@@ -34,7 +34,7 @@ class StockMovement(db.Model):
       user_id=self.user_id,
       quantity_change=self.quantity_change,
       new_quantity=self.new_quantity,
-      timestamp=self.timestamp,
+      timestamp=self.timestamp.isoformat() if self.timestamp else None,
       reason=self.reason,
       report_id=self.report_id
     )

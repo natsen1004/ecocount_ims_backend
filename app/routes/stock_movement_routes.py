@@ -1,6 +1,7 @@
 from flask import Blueprint, request, abort, make_response
 from ..models.stock_movement import StockMovement
 from ..models.products import Products
+from datetime import datetime
 from ..models.user import User
 from ..db import db
 from app.services.notification_service import check_and_create_stock_alert
@@ -20,6 +21,10 @@ def create_stock_movement():
     if not user:
         abort(make_response({"error": "User not found"}, 404))
 
+    timestamp = data.get("timestamp")
+    if not timestamp:
+        timestamp = datetime.utcnow().isoformat()
+
     stock_movement = StockMovement(
         product_id=product.id,
         user_id=user.id,
@@ -33,7 +38,6 @@ def create_stock_movement():
     db.session.commit()
     
     return {"stock_movement": stock_movement.to_dict()}, 201
-
 
 
 @bp.get("/<stock_movement_id>")
