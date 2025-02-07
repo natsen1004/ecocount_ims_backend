@@ -36,19 +36,15 @@ def create_reports():
 
 @bp.get("")
 def get_all_reports():
-    try:
-        user_id = request.args.get("user_id")
+    user_id = request.args.get("user_id")
+    if not user_id:
+        return {"error": "User ID is required to fetch reports"}, 400
 
-        if not user_id:
-            return {"error": "User ID is required to fetch reports"}, 400
+    reports = Reports.query.filter_by(user_id=user_id).all()
 
-        reports = Reports.query.filter_by(user_id=user_id).all()
+    if not reports:
+        return [], 200  
 
-        if not reports:
-            return {"error": "No reports found for this user"}, 404
+    return [report.to_dict() for report in reports], 200
 
-        return [report.to_dict() for report in reports], 200
-    except Exception as e:
-        print(f"Error fetching reports: {e}")  
-        return {"error": "An error occurred while fetching reports."}, 500
 

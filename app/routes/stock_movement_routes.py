@@ -32,6 +32,7 @@ def create_stock_movement():
     
     new_quantity = data.get("new_quantity")
     quantity_change = data.get("quantity_change")
+
     product.quantity = new_quantity
     db.session.commit()
 
@@ -58,6 +59,7 @@ def create_stock_movement():
             quantity_sold=abs(quantity_change)
         )
         db.session.add(report)
+        
     db.session.commit()
     
     return {"stock_movement": stock_movement.to_dict()}, 201
