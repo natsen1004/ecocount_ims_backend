@@ -9,26 +9,28 @@ class StockMovement(db.Model):
   __table_args__ = {'extend_existing': True}
 
   id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+  product_name = db.Column(db.String, nullable=False)
   sku: Mapped[str] = mapped_column(String, nullable=False) 
   quantity_change: Mapped[int] = mapped_column(nullable=False)
   new_quantity: Mapped[int] = mapped_column(nullable=False)
   timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)  
   reason: Mapped[str] = mapped_column(String, nullable=True)  
 
-  product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
-  product: Mapped["Products"] = relationship("Products", back_populates="stock_movements") 
-
   report_id: Mapped[Optional[int]] = mapped_column(ForeignKey("reports.id"))
   report: Mapped[Optional["Reports"]] = relationship("Reports", back_populates="stock_movements") 
 
   user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
   user: Mapped["User"] = relationship("User", back_populates="stock_movements") 
+
+  product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
+  product: Mapped["Products"] = relationship("Products", back_populates="stock_movements")  
   
   def to_dict(self):
     return dict(
       id=self.id,
       sku=self.sku,
       product_id=self.product_id,
+      product_name=self.product.name if self.product else None,
       user_id=self.user_id,
       quantity_change=self.quantity_change,
       new_quantity=self.new_quantity,

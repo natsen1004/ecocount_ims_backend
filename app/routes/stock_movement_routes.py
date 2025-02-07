@@ -1,9 +1,8 @@
 from flask import Blueprint, request, abort, make_response
 from ..models.stock_movement import StockMovement
 from ..models.products import Products
+from ..models.user import User
 from ..db import db
-from datetime import datetime
-from app.routes.route_utilities import validate_model
 from app.services.notification_service import check_and_create_stock_alert
 
 bp= Blueprint("stock_movement_bp", __name__, url_prefix="/stock_movement")
@@ -11,16 +10,38 @@ bp= Blueprint("stock_movement_bp", __name__, url_prefix="/stock_movement")
 @bp.post("")
 def create_stock_movement():
     data = request.get_json()
-    product = Products.query.get(data.get("product_id"))
+    product_name = data.get("product_name")
+
+    product = Products.query.filter_by(name=product_name).first()
     if not product:
         abort(make_response({"error": "Product not found"}, 404))
 
-    stock_movement = StockMovement.from_dict(data)
+    user = User.query.get(data.get("user_id"))
+    if not user:
+        abort(make_response({"error": "User not found"}, 404))
+
+    stock_movement = StockMovement(
+        product_id=product.id,
+        user_id=user.id,
+        sku=data["sku"],
+        quantity_change=data["quantity_change"],
+        new_quantity=data["new_quantity"],
+        reason=data.get("reason")
+    )
+
     db.session.add(stock_movement)
     db.session.commit()
+    
     return {"stock_movement": stock_movement.to_dict()}, 201
 
-@bp.get("")
-def get_stock_movements():
-    stock_movements = StockMovement.query.all()
-    return [sm.to_dict() for sm in stock_movements], 200
+
+
+@bp.get("/<stock_movement_id>")
+def get_stock_movement(stock_movement_id):
+    stock_movement = StockMovement.query.get(stock_movement_id)
+    
+    if not stock_movement:
+        abort(make_response({"error": f"Stock movement ID {stock_movement_id} not found"}, 404))
+
+    return {"stock_movement": stock_movement.to_dict()}, 200
+
