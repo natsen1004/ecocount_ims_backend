@@ -1,8 +1,9 @@
 from flask import Blueprint, request, abort, make_response
 from ..models.stock_movement import StockMovement
 from ..models.products import Products
-from datetime import datetime
 from ..models.user import User
+from ..models.reports import Reports
+from datetime import datetime
 from ..db import db
 from app.services.notification_service import check_and_create_stock_alert
 
@@ -30,6 +31,7 @@ def create_stock_movement():
         timestamp = datetime.utcnow().isoformat()
     
     new_quantity = data.get("new_quantity")
+    quantity_change = data.get("quantity_change")
     product.quantity = new_quantity
     db.session.commit()
 
@@ -45,6 +47,17 @@ def create_stock_movement():
     )
 
     db.session.add(stock_movement)
+
+    report = Reports.query.filter_by(product_id=product.id, user_id=user.id).first()
+    if report:
+        report.quantity_sold += abs(quantity_change)
+    else:
+        report = Reports(
+            product_id=product.id,
+            user_id=user.id,
+            quantity_sold=abs(quantity_change)
+        )
+        db.session.add(report)
     db.session.commit()
     
     return {"stock_movement": stock_movement.to_dict()}, 201
