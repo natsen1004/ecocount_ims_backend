@@ -11,7 +11,11 @@ bp= Blueprint("stock_movement_bp", __name__, url_prefix="/stock_movement")
 @bp.post("")
 def create_stock_movement():
     data = request.get_json()
+    print("Incoming Data from Frontend:", data)
     product_name = data.get("product_name")
+
+    if not product_name:
+        abort(make_response({"error": "Product name is required"}, 400))
 
     product = Products.query.filter_by(name=product_name).first()
     if not product:
@@ -28,6 +32,7 @@ def create_stock_movement():
     stock_movement = StockMovement(
         product_id=product.id,
         user_id=user.id,
+        product_name=data.get("product_name"),
         sku=data["sku"],
         quantity_change=data["quantity_change"],
         new_quantity=data["new_quantity"],
