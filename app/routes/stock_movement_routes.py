@@ -51,15 +51,15 @@ def create_stock_movement():
 
     report = Reports.query.filter_by(product_id=product.id, user_id=user.id).first()
     if report:
-        report.quantity_sold += abs(quantity_change)
-    else:
-        report = Reports(
+        if quantity_change < 0:  
+            report.quantity_sold += abs(quantity_change)
+        else:
+            report = Reports(
             product_id=product.id,
             user_id=user.id,
-            quantity_sold=abs(quantity_change)
-        )
-        db.session.add(report)
-        
+            quantity_sold=abs(quantity_change) if quantity_change < 0 else 0  
+            )
+    db.session.add(report)
     db.session.commit()
     
     return {"stock_movement": stock_movement.to_dict()}, 201

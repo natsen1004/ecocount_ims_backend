@@ -35,33 +35,28 @@ def get_all_reports():
     if not user_id:
         return {"error": "User ID is required to fetch reports"}, 400
 
-    stock_movements = StockMovement.query.filter_by(user_id=user_id).all()
+    reports = Reports.query.filter_by(user_id=user_id).all()
+    
+    report_data = []
+    for report in reports:
+        product = Products.query.get(report.product_id)
+        stock_movements = StockMovement.query.filter_by(product_id=report.product_id, user_id=user_id).all()
 
-    if not stock_movements:
-        return [], 200 
-
-    report_data = {}
-    for movement in stock_movements:
-        product_id = movement.product_id
-
-        if product_id not in report_data:
-            report_data[product_id] = {
-                "product_id": product_id,
-                "product_name": movement.product_name,
-                "total_quantity_sold": 0,
-                "stock_movements": []
-            }
-
-        if movement.quantity_change < 0:  
-            report_data[product_id]["total_quantity_sold"] += abs(movement.quantity_change)
-
-        report_data[product_id]["stock_movements"].append({
-            "timestamp": movement.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-            "quantity_change": movement.quantity_change,
-            "new_quantity": movement.new_quantity,
+        report_data.append({
+            "product_id": report.product_id,
+            "product_name": product.name if product else "Unknown",
+            "total_quantity_sold": report.quantity_sold, 
+            "stock_movements": [
+                {
+                    "timestamp": movement.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                    "quantity_change": movement.quantity_change,
+                    "new_quantity": movement.new_quantity,
+                }
+                for movement in stock_movements
+            ],
         })
 
-    reports = list(report_data.values())
+    return report_data, 200
 
-    return reports, 200
+
 
