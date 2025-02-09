@@ -11,13 +11,20 @@ def get_users():
     users_list = [user.to_dict() for user in users]
     return users_list, 200
 
-@bp.get("/<user_id>")
-def get_one_user(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        abort(make_response({"error": "User not found"}, 404))
+@bp.get("/get_user_id")
+def get_user_id():
+    user_email = request.args.get("user_email")
 
-    return {"user": user.to_dict()}, 200
+    if not user_email:
+        return make_response({"error": "User email is required"}, 400)
+
+    user = User.query.filter_by(email=user_email).first()
+    
+    if not user:
+        return make_response({"error": "User not found"}, 404)
+
+    return {"user_id": user.id}, 200
+
 
 @bp.put("/<user_id>")
 def update_user(user_id):
