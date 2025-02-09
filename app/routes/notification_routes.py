@@ -40,3 +40,21 @@ def get_notifications(user_id):
     ]
 
     return notification_list, 200
+
+@bp.post("/mark_read")
+def mark_notification_as_read():
+    data = request.get_json()
+    notification_id = data.get("notification_id")
+
+    if not notification_id:
+        return {"error": "Notification ID is required"}, 400
+
+    notification = db.session.query(Notification).filter_by(id=notification_id).first()
+
+    if not notification:
+        return {"error": "Notification not found"}, 404
+
+    notification.read = True 
+    db.session.commit()
+
+    return {"message": "Notification marked as read", "notification_id": notification_id}, 200
