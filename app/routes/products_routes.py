@@ -3,6 +3,7 @@ from ..db import db
 from app.models.products import Products
 from app.models.user import User
 from .route_utilities import validate_model
+from app.services.notification_service import send_notification
 
 bp = Blueprint("products_bp", __name__, url_prefix="/products")
 
@@ -17,6 +18,10 @@ def create_product():
     new_product = Products.from_dict(request_body)
     db.session.add(new_product)
     db.session.commit()
+
+    message = f"New product added: {new_product.name} (SKU: {new_product.sku})"
+    send_notification(user_id, message, db.session, "Product Added", new_product.id)
+
     return {"product": new_product.to_dict()}, 201
 
 @bp.get("")
@@ -54,9 +59,16 @@ def delete_product(product_id):
     product = Products.query.filter_by(id=product_id, user_id=user_id).first()
     if not product:
         abort(make_response({"error": "Product not found or unauthorized"}, 404))
+    
+    product_name = product.name  
+    product_sku = product.sku
 
     db.session.delete(product)
     db.session.commit()
+
+    message = f"Product removed: {product_name} (SKU: {product_sku})"
+    send_notification(user_id, message, db.session, "Product Removed", product_id)
+    
     return {"message": f"Product {product_id} deleted"}, 200
 
 

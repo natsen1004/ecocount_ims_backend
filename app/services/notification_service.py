@@ -4,46 +4,51 @@ from datetime import datetime
 from app.models.notification import Notification
 from app.services.email_services import send_email_notification
 
-def send_notification(user_id, message, db_session: Session):
+def send_notification(user_id, message, db_session: Session, notification_type="General Alert", product_id=None):
     notification = Notification(
-        type="Stock Alert",
+        type=notification_type,
         message=message,
         sent_at=datetime.utcnow(),
-        user_id=user_id  
+        user_id=user_id,
+        product_id=product_id
     )
 
     db_session.add(notification)
     db_session.commit()
     print(f"Notification sent to user {user_id}: {message}")
 
+
 def check_and_create_stock_alert(stock_movement, db_session: Session):
-  product = stock_movement.product 
+    """Checks stock level, logs stock movement, and sends notifications for low stock alerts."""
+    product = stock_movement.product
+    quantity_change = stock_movement.quantity_change
 
-  if product.quantity <= product.reorder_level:
-    notification_type = "Low Stock Alert"
-    message = f"Stock level for {product.name} (SKU: {product.sku}) is low."
+    movement_message = f"Stock updated: {product.name} (SKU: {product.sku}), changed by {quantity_change} units."
+    send_notification(product.user_id, movement_message, db_session, "Stock Movement", product.id)
 
-    existing_notification = (
-      db.session(Notification)
-      .filter_by(product_id=product.id, type=notification_type)
-      .first()
-    )
+    if product.quantity <= product.reorder_level:
+        low_stock_message = f"Low stock alert: {product.name} (SKU: {product.sku}). Only {product.quantity} left."
 
-    if existing_notification:
-      return
+        existing_notification = db_session.query(Notification).filter_by(
+            product_id=product.id, type="Low Stock Alert"
+        ).first()
 
-    notification = Notification(
-      type=notification_type,
-      sent_at=datetime.utcnow(),
-      product_id=product.id,
-      user_id=product.user_id
-    )
-    
-    db_session.add(notification)
-    db_session.commit()
+        if not existing_notification:
+            send_notification(product.user_id, low_stock_message, db_session, "Low Stock Alert", product.id)
 
-    user_email = product.user.email
-    send_email_notification(user_email, message)
+            notification = Notification(
+                type="Low Stock Alert",
+                message=low_stock_message,
+                sent_at=datetime.utcnow(),
+                product_id=product.id,
+                user_id=product.user_id
+            )
+            db_session.add(notification)
+            db_session.commit()
+
+            user_email = product.user.email
+            send_email_notification(user_email, low_stock_message)
+
 
 def check_all_products_and_notify(db_session: Session):
     from app.models.products import Products
