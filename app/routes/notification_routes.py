@@ -25,8 +25,18 @@ def create_notification():
     db.session.commit()
     return {"notification": notification.to_dict()}, 201
 
-@bp.get("/<user_id>")
+@bp.get("")
 def get_notifications(user_id):
-    notifications = Notification.query.filter_by(user_id=user_id).all()
-    return [notification.to_dict() for notification in notifications], 200
+    user_id = request.args.get("user_id")
+    if not user_id:
+        response = ({"error": "User ID is required"}), 400
+        return response
+    
+    notifications = db.session.query(Notification).filter_by(user_id=user_id, status="unread").all()
 
+    notification_list = [
+        {"id": n.id, "message": n.message, "timestamp": n.sent_at}
+        for n in notifications
+    ]
+
+    return notification_list, 200
