@@ -11,6 +11,7 @@ class Notification(db.Model):
     type: Mapped[str] = mapped_column(nullable=False)
     sent_at: Mapped[Optional[datetime]] = mapped_column(default=lambda: datetime.utcnow())  
     read: Mapped[bool] = mapped_column(default=False)
+    message: Mapped[str] = mapped_column(nullable=False)
 
     product_id: Mapped[Optional[int]] = mapped_column(ForeignKey("products.id"), nullable=True)  
     product = relationship("Products", back_populates="notifications") 
@@ -22,6 +23,7 @@ class Notification(db.Model):
         return dict(
             id=self.id,
             type=self.type,
+            message=self.message, 
             sent_at=self.sent_at.isoformat() if self.sent_at else None, 
             read=self.read,
             product_id=self.product_id,
@@ -32,6 +34,7 @@ class Notification(db.Model):
     def from_dict(cls, notification_data):
         return cls(
             type=notification_data.get("type"),
+            message=notification_data.get("message"),
             sent_at=notification_data.get("sent_at", datetime.utcnow()),
             product_id=notification_data.get("product_id"),  
             user_id=notification_data.get("user_id"),  
