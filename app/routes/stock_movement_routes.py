@@ -53,13 +53,14 @@ def create_stock_movement():
     if report:
         if quantity_change < 0:  
             report.quantity_sold += abs(quantity_change)
-        else:
-            report = Reports(
+    else:  
+        report = Reports(
             product_id=product.id,
             user_id=user.id,
             quantity_sold=abs(quantity_change) if quantity_change < 0 else 0  
-            )
-    db.session.add(report)
+        )
+        db.session.add(report) 
+    
     db.session.commit()
     
     return {"stock_movement": stock_movement.to_dict()}, 201
