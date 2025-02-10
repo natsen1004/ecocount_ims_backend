@@ -12,16 +12,15 @@ def create_notification():
     data = request.get_json()
 
     user_email = data.get("user_email")
-    product_id = data.get("product_id")
+    product_name = data.get("product_name") 
     notification_type = data.get("type")
     message = data.get("message", "No message provided.")  
 
-    if not user_email or not product_id or not notification_type:
+    if not user_email or not product_name or not notification_type:
         return make_response({"error": "Missing required fields"}, 400)
 
     user = User.query.filter_by(email=user_email).first()
-    product = Products.query.get(product_id)
-
+    product = Products.query.filter_by(name=product_name).first()  
     if not product or not user:
         return make_response({"error": "Product or user not found"}, 404)
 
@@ -30,7 +29,7 @@ def create_notification():
             type=notification_type,
             message=message,
             sent_at=datetime.utcnow(),
-            product_id=product.id,
+            product_id=product.id,  
             user_id=user.id
         )
 
