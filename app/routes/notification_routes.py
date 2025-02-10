@@ -10,8 +10,10 @@ bp = Blueprint("notification_bp", __name__, url_prefix="/notifications")
 @bp.post("")
 def create_notification():
     data = request.get_json()
+
+    user = User.query.filter_by(email=data.get("user_email")).first()
     product = Products.query.get(data.get("product_id"))
-    user = User.query.get(data.get("user_id"))
+
     if not product or not user:
         abort(make_response({"error": "Product or user not found"}, 404))
 
@@ -21,9 +23,12 @@ def create_notification():
         product_id=product.id,
         user_id=user.id
     )
+
     db.session.add(notification)
     db.session.commit()
+
     return {"notification": notification.to_dict()}, 201
+
 
 @bp.get("")
 def get_notifications():
