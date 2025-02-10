@@ -5,7 +5,7 @@ from ..models.user import User
 from ..models.reports import Reports
 from datetime import datetime
 from ..db import db
-from app.services.notification_service import check_and_create_stock_alert
+from app.services.notification_service import send_notification
 
 bp= Blueprint("stock_movement_bp", __name__, url_prefix="/stock_movement")
 
@@ -62,6 +62,9 @@ def create_stock_movement():
         db.session.add(report) 
     
     db.session.commit()
+
+    message = f"Stock movement for {product.name}: {quantity_change} units. New Quantity: {new_quantity}."
+    send_notification(user.id, message, db.session, "Stock Movement", product.id)
     
     return {"stock_movement": stock_movement.to_dict()}, 201
 

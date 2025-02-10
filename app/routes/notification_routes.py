@@ -10,7 +10,6 @@ bp = Blueprint("notification_bp", __name__, url_prefix="/notifications")
 @bp.post("")
 def create_notification():
     data = request.get_json()
-
     user_email = data.get("user_email")
     product_name = data.get("product_name") 
     notification_type = data.get("type")
@@ -83,7 +82,6 @@ def mark_notification_as_read():
     if not notification_id or not user_email:
         return make_response({"error": "Notification ID and user email are required"}, 400)
 
-    # Find the user by email
     user = User.query.filter_by(email=user_email).first()
 
     if not user:
