@@ -11,23 +11,38 @@ bp = Blueprint("notification_bp", __name__, url_prefix="/notifications")
 def create_notification():
     data = request.get_json()
 
-    user = User.query.filter_by(email=data.get("user_email")).first()
-    product = Products.query.get(data.get("product_id"))
+    user_email = data.get("user_email")
+    product_id = data.get("product_id")
+    notification_type = data.get("type")
+    message = data.get("message", "No message provided.")  
+
+    if not user_email or not product_id or not notification_type:
+        return make_response({"error": "Missing required fields"}, 400)
+
+    user = User.query.filter_by(email=user_email).first()
+    product = Products.query.get(product_id)
 
     if not product or not user:
-        abort(make_response({"error": "Product or user not found"}, 404))
+        return make_response({"error": "Product or user not found"}, 404)
 
-    notification = Notification(
-        type=data.get("type"),
-        sent_at=datetime.utcnow(),
-        product_id=product.id,
-        user_id=user.id
-    )
+    try:
+        notification = Notification(
+            type=notification_type,
+            message=message,
+            sent_at=datetime.utcnow(),
+            product_id=product.id,
+            user_id=user.id
+        )
 
-    db.session.add(notification)
-    db.session.commit()
+        db.session.add(notification)
+        db.session.commit()
 
-    return {"notification": notification.to_dict()}, 201
+        return {"notification": notification.to_dict()}, 201
+
+    except Exception as e:
+        db.session.rollback()  
+        return make_response({"error": f"Failed to create notification: {str(e)}"}, 500)
+
 
 
 @bp.get("")
