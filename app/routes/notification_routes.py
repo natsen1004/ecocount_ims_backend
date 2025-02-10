@@ -26,35 +26,56 @@ def create_notification():
     return {"notification": notification.to_dict()}, 201
 
 @bp.get("")
-def get_notifications(user_id):
-    user_id = request.args.get("user_id")
-    if not user_id:
-        response = ({"error": "User ID is required"}), 400
-        return response
+def get_notifications():
+    user_email = request.args.get("user_email")
+
+    if not user_email:
+        return make_response({"error": "User email is required"}, 400)
+
+    user = User.query.filter_by(email=user_email).first()
     
-    notifications = db.session.query(Notification).filter_by(user_id=user_id, status="unread").all()
+    if not user:
+        return make_response({"error": "User not found"}, 404)
+
+    notifications = Notification.query.filter_by(user_id=user.id).all()
 
     notification_list = [
-        {"id": n.id, "message": n.message, "timestamp": n.sent_at}
+        {
+            "id": n.id,
+            "type": n.type,
+            "message": getattr(n, "message", "No message"), 
+            "sent_at": n.sent_at.isoformat(),
+            "read": n.read,
+            "product_id": n.product_id,
+            "user_id": n.user_id
+        }
         for n in notifications
     ]
 
-    return notification_list, 200
+    return notification_list
+
 
 @bp.post("/mark_read")
 def mark_notification_as_read():
     data = request.get_json()
     notification_id = data.get("notification_id")
+    user_email = data.get("user_email")
 
-    if not notification_id:
-        return {"error": "Notification ID is required"}, 400
+    if not notification_id or not user_email:
+        return make_response({"error": "Notification ID and user email are required"}, 400)
 
-    notification = db.session.query(Notification).filter_by(id=notification_id).first()
+    # Find the user by email
+    user = User.query.filter_by(email=user_email).first()
+
+    if not user:
+        return make_response({"error": "User not found"}, 404)
+
+    notification = Notification.query.filter_by(id=notification_id, user_id=user.id).first()
 
     if not notification:
-        return {"error": "Notification not found"}, 404
+        return make_response({"error": "Notification not found or does not belong to this user"}, 404)
 
-    notification.read = True 
+    notification.read = True
     db.session.commit()
 
     return {"message": "Notification marked as read", "notification_id": notification_id}, 200
