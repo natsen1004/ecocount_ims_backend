@@ -1,6 +1,5 @@
 Backend README (Flask API)
   Project Name: Inventory Management System - Backend
-
   This is the backend for the Inventory Management System (IMS), built using Flask. It provides API endpoints for managing inventory, handling notifications, and processing user data.
 
 Features
