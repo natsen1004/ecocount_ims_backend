@@ -1,6 +1,7 @@
 from flask import Blueprint, request, abort, make_response
 from ..db import db
 from app.models.products import Products
+from app.models.notification import Notification
 from app.models.user import User
 from .route_utilities import validate_model
 from app.services.notification_service import send_notification
@@ -50,25 +51,29 @@ def update_product(product_id):
     db.session.commit()
     return {"message": f"Product {product_id} updated", "product": product.to_dict()}, 200
 
-@bp.delete("/<product_id>")
+@bp.delete("/<int:product_id>")
 def delete_product(product_id):
-    user_id = request.json.get('user_id')
-    if not user_id:
-        abort(make_response({"error": "user_id is required"}, 400))
+    product = Products.query.get(product_id)
 
-    product = Products.query.filter_by(id=product_id, user_id=user_id).first()
     if not product:
-        abort(make_response({"error": "Product not found or unauthorized"}, 404))
-    
-    product_name = product.name  
-    product_sku = product.sku
+        return make_response({"error": "Product not found"}, 404)
 
+    user_id = request.get_json().get("user_id")  
+    if not user_id:
+        return make_response({"error": "User ID is required"}, 400)
+
+    notifications = Notification.query.filter_by(product_id=product_id).all()
+    for notification in notifications:
+        db.session.delete(notification)
+
+    
     db.session.delete(product)
     db.session.commit()
 
-    message = f"Product removed: {product_name} (SKU: {product_sku})"
-    send_notification(user_id, message, db.session, "Product Removed", product_id)
-    
-    return {"message": f"Product {product_id} deleted"}, 200
+    message = f"Product removed: {product.name} (SKU: {product.sku})"
+    send_notification(user_id, message, db.session, "Product Removed", None) 
+
+    return make_response({"message": "Product deleted successfully"}, 200)
+
 
 

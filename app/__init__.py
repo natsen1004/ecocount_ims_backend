@@ -31,8 +31,6 @@ def create_app(config=None):
 
     db.init_app(app)
     migrate.init_app(app, db)
-    # mail.init_app(app)
-    # CORS(app)
     allowed_origins = [
         "http://localhost:5173",
         "https://ecocount-ims-frontend.onrender.com"
